@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "knowledge-gun": {
+      "command": "knowledge-gun-mcp",
+      "env": {
+        "KNOWLEDGE_GUN_GRAPH_PATH": "/Users/<you>/path/to/your/graph.json",
+        "KNOWLEDGE_GUN_INTRO_DIR": "/Users/<you>/path/to/intros/",
+        "KNOWLEDGE_GUN_ROOTS_DIR": "/Users/<you>/path/to/roots/"
+      }
+    }
+  }
+}

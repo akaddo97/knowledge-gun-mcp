@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "knowledge-gun-mcp"
+version = "0.1.0"
+description = "MCP server wrapping knowledge-gun. Exposes knowledge-graph context bundles as tools any MCP-aware LLM client can call."
+readme = "README.md"
+license = "MIT"
+authors = [{name = "Addo-Kwabena Addo", email = "akaddo97@gmail.com"}]
+requires-python = ">=3.11"
+keywords = ["mcp", "model-context-protocol", "knowledge-graph", "llm", "context"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "mcp>=1.0",
+    "knowledge-gun @ git+https://github.com/akaddo97/knowledge-gun",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+knowledge-gun-mcp = "knowledge_gun_mcp.server:run"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/knowledge_gun_mcp"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
