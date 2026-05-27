@@ -23,7 +23,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "mcp>=1.0",
+    # Upper bound: mcp 1.x is the current major; a 2.0 release will likely
+    # bring breaking JSON-RPC / capability-shape changes. Re-evaluate on 2.0.
+    "mcp>=1.27,<2",
     "knowledge-gun @ git+https://github.com/akaddo97/knowledge-gun",
 ]
 
