@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import asyncio
+import difflib
 import logging
+import re
 from typing import Any
 
 import knowledge_gun
@@ -15,6 +17,15 @@ from knowledge_gun_mcp import __version__
 log = logging.getLogger(__name__)
 
 server: Server = Server(name="knowledge-gun-mcp", version=__version__)
+
+# Strip absolute home-directory paths from any text leaving the server.
+# macOS (/Users/<x>/) and Linux (/home/<x>/) only — Windows is a v0.2 TODO.
+_HOME_PATH_RE = re.compile(r"(/Users/|/home/)[^/\s'\"`]+/")
+
+
+def _sanitise_paths(text: str) -> str:
+    """Redact host home-directory paths from text bound for the MCP client."""
+    return _HOME_PATH_RE.sub(r"\1<redacted>/", text)
 
 
 @server.list_tools()
@@ -64,11 +75,23 @@ async def _call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCon
         topic = (arguments or {}).get("topic", "").strip()
         if not topic:
             return [types.TextContent(type="text", text="error: topic required")]
+        # Validate against AVAILABLE_TOPICS before dispatch — otherwise the
+        # parent library's "topic not found" markdown leaks the host's
+        # absolute filesystem path back to the MCP client.
+        available = sorted(knowledge_gun.AVAILABLE_TOPICS)
+        if topic not in available:
+            close = difflib.get_close_matches(topic, available, n=1, cutoff=0.6)
+            hint = f" Did you mean: {close[0]}?" if close else ""
+            return [types.TextContent(
+                type="text",
+                text=f"error: unknown topic {topic!r}.{hint} Use list_topics to discover.",
+            )]
         try:
             md = knowledge_gun.generate_bundle(topic)
         except Exception as exc:
             log.exception("get_bundle failed for %s", topic)
-            return [types.TextContent(type="text", text=f"error: {type(exc).__name__}: {exc}")]
+            msg = _sanitise_paths(f"{type(exc).__name__}: {exc}")
+            return [types.TextContent(type="text", text=f"error: {msg}")]
         return [types.TextContent(type="text", text=md)]
     return [types.TextContent(type="text", text=f"error: unknown tool {name!r}")]
 
