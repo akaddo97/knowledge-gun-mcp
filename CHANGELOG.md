@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README: `Tools` catalogue table — drop-in scannable replacement for the prose list, with per-tool sections kept beneath as expanded references.
 - README: `Troubleshooting` section covering the three classic stdio gotchas (`PATH`, env-vars unset, host not fully restarted).
 - `examples/example_bundle_output.md` — captured `knowledge-gun --topic studio` output against the bundled demo graph (fictional Lantern-Bough Games). Lets readers see the shape and tone of a bundle without running anything.
-- New read-only tools: `search_nodes`, `get_node`, `get_topic_anchors`. Substring discovery, single-node drill-in, and anchor-id exposure for a topic — see the **Tools** section.
+- New read-only tools: `search_nodes`, `get_node`, `get_topic_anchors`, `get_graph_summary`. Substring discovery, single-node drill-in, anchor-id exposure for a topic, and a zero-arg orientation snapshot — see the **Tools** section.
 - GitHub repository topics: `python`, `mcp-server`, `claude`.
 
 ### Changed
