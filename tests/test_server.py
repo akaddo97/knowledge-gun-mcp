@@ -166,3 +166,23 @@ async def test_get_bundle_exception_text_path_sanitised():
     assert "/Users/charlie/" not in out[0].text
     assert "<redacted>" in out[0].text
     assert "FileNotFoundError" in out[0].text
+
+
+# --- Robustness: type validation on topic argument ---
+
+
+async def test_get_bundle_rejects_non_string_topic():
+    """A client violating the JSON-schema (topic as int) must surface as a
+    clean error, not an unhandled AttributeError from .strip()."""
+    out = await srv._call_tool("get_bundle", {"topic": 123})
+    assert "topic must be a string" in out[0].text
+
+
+# --- MCP polish: instructions field in init options ---
+
+
+async def test_server_advertises_instructions():
+    opts = srv.server.create_initialization_options()
+    assert opts.instructions is not None
+    assert "list_topics" in opts.instructions
+    assert "get_bundle" in opts.instructions

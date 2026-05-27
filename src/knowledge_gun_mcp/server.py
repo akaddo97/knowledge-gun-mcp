@@ -16,7 +16,17 @@ from knowledge_gun_mcp import __version__
 
 log = logging.getLogger(__name__)
 
-server: Server = Server(name="knowledge-gun-mcp", version=__version__)
+server: Server = Server(
+    name="knowledge-gun-mcp",
+    version=__version__,
+    instructions=(
+        "Surfaces a curated knowledge graph as paste-ready context bundles. "
+        "Call list_topics to discover the configured topic names, then call "
+        "get_bundle(topic) to retrieve the markdown bundle for that topic. "
+        "Use get_bundle whenever the user asks for context, briefing, or "
+        "background; call list_topics first if the topic name is unknown."
+    ),
+)
 
 # Strip absolute home-directory paths from any text leaving the server.
 # macOS (/Users/<x>/) and Linux (/home/<x>/) only — Windows is a v0.2 TODO.
@@ -72,7 +82,12 @@ async def _call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextCon
         text = "\n".join(topics) if topics else "(no topics configured)"
         return [types.TextContent(type="text", text=text)]
     if name == "get_bundle":
-        topic = (arguments or {}).get("topic", "").strip()
+        raw = (arguments or {}).get("topic")
+        if raw is None:
+            return [types.TextContent(type="text", text="error: topic required")]
+        if not isinstance(raw, str):
+            return [types.TextContent(type="text", text="error: topic must be a string")]
+        topic = raw.strip()
         if not topic:
             return [types.TextContent(type="text", text="error: topic required")]
         # Validate against AVAILABLE_TOPICS before dispatch — otherwise the
