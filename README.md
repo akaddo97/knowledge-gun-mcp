@@ -1,5 +1,9 @@
 # Knowledge Gun MCP
 
+[![tests](https://github.com/akaddo97/knowledge-gun-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/akaddo97/knowledge-gun-mcp/actions/workflows/test.yml)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 MCP server wrapping [`knowledge-gun`](https://github.com/akaddo97/knowledge-gun). Exposes paste-ready knowledge-graph context bundles as tools any MCP-aware LLM client can call. Stdio transport, two tools, ~150 lines.
 
 ## What this is
@@ -108,18 +112,27 @@ A copy-paste sample lives in [`examples/claude_desktop_config.json`](examples/cl
 
 ## Tools
 
-The server exposes exactly two tools — narrow surface, no fuzz.
+The server exposes a narrow surface — read-only, no fuzz.
+
+| Tool | Arguments | Returns | Use when |
+|---|---|---|---|
+| `list_topics` | — | newline-separated topic names | you don't know which topic to ask for |
+| `get_bundle` | `topic` (string) | paste-ready markdown bundle (~1,500-4,000 words) | the user asks for context, a briefing, or background on `<their X>` |
 
 ### `list_topics()`
 
 Returns the topic names configured for the current graph. No arguments. Use this first if you don't know which topic to ask for.
 
+Example output (against the bundled demo graph):
+
 ```
-career
-learning
-networking
-tech
+industry
+projects
+studio
+team
 ```
+
+Your topics will differ — they are derived from whichever `<topic>.intro.md` and `<topic>.roots.json` files are present in your configured intro and roots directories.
 
 ### `get_bundle(topic)`
 
@@ -130,6 +143,8 @@ Returns the paste-ready markdown bundle for a topic. Typically 1,500-4,000 words
 - a usage footer pointing at sibling topics.
 
 Argument: `topic` (string, required). Use `list_topics` if you don't know the value.
+
+A captured sample bundle from the bundled demo graph (fictional indie game studio) lives in [`examples/example_bundle_output.md`](examples/example_bundle_output.md).
 
 ## Bring your own graph
 
@@ -160,6 +175,16 @@ The inspector opens a web UI; you can list the tools, call `list_topics`, then c
 - **Stdio only.** Single-machine, single-user. The server runs as a child process of the host and inherits its environment. HTTP/SSE transport (for shared / hosted use across devices) is on the roadmap for v0.2.
 - **No write tools.** This server is read-only over your graph. To mutate the graph, use `knowledge-gun`'s sibling tooling.
 - **Bundles regenerate per call.** No caching. A `get_bundle` call reads the graph file, walks the neighbourhood, and assembles the markdown each time. Sub-second on graphs up to ~10k nodes.
+
+## Troubleshooting
+
+**Tools don't appear in the host's MCP indicator after restart.** Three classic stdio gotchas, in likely order:
+
+1. **`knowledge-gun-mcp` not on PATH.** The host launches the command in its own environment, not your shell's. Use an absolute path in the `command` field (e.g. `/Users/<you>/.venvs/kg/bin/knowledge-gun-mcp`) or ensure the venv's `bin/` is on the global PATH the host sees.
+2. **No env vars set, no demo fallback.** Without `KNOWLEDGE_GUN_GRAPH_PATH` / `KNOWLEDGE_GUN_INTRO_DIR` / `KNOWLEDGE_GUN_ROOTS_DIR`, the server falls back to the bundled demo graph. If you expected your own graph, recheck the env block in your client's MCP config.
+3. **Host not fully restarted.** Some clients (Claude Desktop in particular) cache the MCP server registry; a quit-from-menu beats a window close. Verify with the MCP Inspector first (see above) — if Inspector lists the tools, the server is fine and the gap is on the host side.
+
+If the tools appear but `get_bundle` returns `error: ...`, run `knowledge-gun --list` from the same shell the host inherits to confirm the configured topics resolve correctly.
 
 ## Architecture
 
