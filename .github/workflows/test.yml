@@ -49,6 +49,10 @@ jobs:
         run: uv pip install --system -e .
 
       - name: Run pip-audit
+        # --strict treats "dep not on PyPI" as a hard error; knowledge-gun (parent
+        # library) is GitHub-only, so strict mode would fail every run for a
+        # non-security reason. Default mode still audits all PyPI-listed deps for
+        # CVEs and exits non-zero on any real vulnerability finding.
         run: |
           uv pip install --system pip-audit
-          pip-audit --strict
+          pip-audit
