@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-MCP server wrapping [`knowledge-gun`](https://github.com/akaddo97/knowledge-gun). Exposes paste-ready knowledge-graph context bundles as tools any MCP-aware LLM client can call. Stdio transport, two tools, ~150 lines.
+MCP server wrapping [`knowledge-gun`](https://github.com/akaddo97/knowledge-gun). Exposes paste-ready knowledge-graph context bundles as tools any MCP-aware LLM client can call. Stdio transport, six read-only tools.
 
 ## What this is
 
@@ -118,6 +118,10 @@ The server exposes a narrow surface — read-only, no fuzz.
 |---|---|---|---|
 | `list_topics` | — | newline-separated topic names | you don't know which topic to ask for |
 | `get_bundle` | `topic` (string) | paste-ready markdown bundle (~1,500-4,000 words) | the user asks for context, a briefing, or background on `<their X>` |
+| `search_nodes` | `query` (string), `limit` (int, default 10) | markdown table of (id, label, file_type) matches | the user names someone/something and you want to confirm it's in the graph |
+| `get_node` | `node_id` (string) | the node's attributes + its 1-hop neighbourhood, as markdown | a follow-up like "tell me more about `<node>`" after a bundle |
+| `get_topic_anchors` | `topic` (string) | the anchor node ids that seed the topic's 2-hop walk | a bundle's scope surprises the user and you want to show *why* it scoped that way |
+| `get_graph_summary` | — | node/edge counts, topic names, and per-`file_type` counts | the first call after connecting, to confirm the server points at the graph you expect |
 
 ### `list_topics()`
 
