@@ -54,5 +54,7 @@ jobs:
         # non-security reason. Default mode still audits all PyPI-listed deps for
         # CVEs and exits non-zero on any real vulnerability finding.
         run: |
+          # keep pip itself patched so pip-audit does not flag the runner's bundled pip
+          uv pip install --system --upgrade pip
           uv pip install --system pip-audit
           pip-audit
