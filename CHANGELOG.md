@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub repository topic: `context` — too broad, crowded out by stronger tags.
 
 ### Security
-- _See sub 7's commit notes on the `chore/refresh-2026-05-27` branch for the privacy + dependency hardening that lands alongside this README polish._
+- Privacy and dependency hardening.
 
 ## [0.1.0] — 2026-05-07
 
